@@ -1,7 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import DeclarativeBase, relationship
+from sqlalchemy.orm import DeclarativeBase, relationship , Session
 from sqlalchemy import Column, Integer, String, REAL, DateTime, Date, ForeignKey
 
 engine = create_engine(
@@ -14,9 +12,8 @@ class Base(DeclarativeBase): pass
 class Person(Base):
     __tablename__ = "people"
 
-    id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
-    phone_number = Column(String, nullable=False)
+    id = Column(Integer, nullable=False, primary_key=True)
     type_of_diabet = Column(Integer)
 
 
