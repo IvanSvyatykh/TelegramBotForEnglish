@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, relationship , Session
-from sqlalchemy import Column, Integer, String, REAL, DateTime, Date, ForeignKey
+from sqlalchemy.orm import DeclarativeBase, relationship, Session
+from sqlalchemy import Column, BigInteger, Integer, String, REAL, DateTime, Date, ForeignKey
 
 engine = create_engine(
     "postgresql+psycopg2://okyupals:aH7AaQbo9ywKjB0h_sT2hrPttbmRftjT@raja.db.elephantsql.com/okyupals")
@@ -13,8 +13,8 @@ class Person(Base):
     __tablename__ = "people"
 
     name = Column(String)
-    id = Column(Integer, nullable=False, primary_key=True)
-    type_of_diabet = Column(Integer)
+    id = Column(BigInteger, nullable=False, primary_key=True)
+    type_of_diabet = Column(String)
 
 
 class Day_Report(Base):

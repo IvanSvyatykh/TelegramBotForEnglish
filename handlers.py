@@ -40,5 +40,13 @@ async def set_diabetes_type_handler(msg: Message, state=FSMContext) -> None:
     await show_summary(msg, data)
 
 
-async def show_summary(msg: Message, data: Dict[str, Any], ):
+async def show_summary(msg: Message, data: Dict[str, Any]):
+    with Session(autoflush=False, bind=database.engine) as db:
+        repository = TableRepository(db=db, entity=database.Person)
+        user_to_db = database.Person()
+        user_to_db.id = data["id"]
+        user_to_db.name = data["name"]
+        user_to_db.type_of_diabet = data["diabetes_type"]
+        repository.add_user(user_to_db)
     await msg.answer(text=text.registration.format(name=data["name"], id=data["id"], diabetes_type=data["diabetes_type"]))
+

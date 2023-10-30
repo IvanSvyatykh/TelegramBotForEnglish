@@ -9,6 +9,14 @@ def get_reply_keyboard():
     return keyboard_builder.as_markup(one_time_keyboard=True, resize_keyboard=True)
 
 
+def get_confirmation_keyboard():
+    keyboard_builder = ReplyKeyboardBuilder()
+    keyboard_builder.button(text="Да")
+    keyboard_builder.button(text="Нет")
+    return keyboard_builder.as_markup(one_time_keyboard=True, resize_keyboard=True)
+    return keyboard_builder.as_markup(one_time_keyboard=True, resize_keyboard=True)
+
+
 def get_diabet_type_keyboard():
     keyboard_builder = ReplyKeyboardBuilder()
     keyboard_builder.button(text="1 тип диабета", callback_data="first type diabetes")

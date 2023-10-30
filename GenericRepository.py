@@ -12,6 +12,6 @@ class TableRepository:
     def get_by_id(self, id: int):
         return self.db.query(self.entity).filter(self.entity.id == id).first()
 
-    def add(self, entity, created_by_user_id: int = None):
-        entity.created_by = created_by_user_id
+    def add_user(self, entity):
         self.db.add(entity)
+        self.db.commit()
