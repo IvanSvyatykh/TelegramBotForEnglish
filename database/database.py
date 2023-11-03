@@ -1,6 +1,5 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, relationship, Session
-from sqlalchemy import Column, BigInteger, Integer, String, REAL, DateTime, Date, ForeignKey
+from sqlalchemy import create_engine, Column, ForeignKey, Integer, REAL, String, Time, Date, BigInteger
+from sqlalchemy.orm import DeclarativeBase
 
 engine = create_engine(
     "postgresql+psycopg2://okyupals:aH7AaQbo9ywKjB0h_sT2hrPttbmRftjT@raja.db.elephantsql.com/okyupals")
@@ -12,25 +11,9 @@ class Base(DeclarativeBase): pass
 class Person(Base):
     __tablename__ = "people"
 
-    name = Column(String)
     id = Column(BigInteger, nullable=False, primary_key=True)
-    type_of_diabet = Column(String)
-
-
-class Day_Report(Base):
-    __tablename__ = "day_report"
-
-    id = Column(Integer, primary_key=True, index=True)
-
-    person_id = Column(Integer, ForeignKey("people.id"))
-
-    breakfast_id = Column(Integer, ForeignKey("meal_report.id"))
-
-    lunch_id = Column(Integer, ForeignKey("meal_report.id"))
-
-    dinner_id = Column(Integer, ForeignKey("meal_report.id"))
-
-    date = Column(Date, nullable=False)
+    name = Column(String)
+    diabetes_type = Column(String)
 
 
 class Meal_Report(Base):
@@ -41,7 +24,18 @@ class Meal_Report(Base):
     notes = Column(String, nullable=True)
     sugar_value_before = Column(REAL, nullable=True)
     sugar_value_after = Column(REAL, nullable=True)
-    datetime = Column(DateTime(), nullable=False)
+    time = Column(Time(), nullable=False)
+
+
+class Day_Report(Base):
+    __tablename__ = "day_report"
+
+    id = Column(Integer, primary_key=True, index=True)
+    person_id = Column(Integer, ForeignKey("people.id"))
+    breakfast_id = Column(Integer, ForeignKey("meal_report.id"))
+    lunch_id = Column(Integer, ForeignKey("meal_report.id"))
+    dinner_id = Column(Integer, ForeignKey("meal_report.id"))
+    date = Column(Date, nullable=False)
 
 
 Base.metadata.create_all(bind=engine)
