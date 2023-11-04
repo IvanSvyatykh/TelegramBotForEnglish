@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, ForeignKey, Integer, REAL, String, Time, Date, BigInteger
+from sqlalchemy import create_engine, Column, ForeignKey, Integer, REAL, String, Date, BigInteger
 from sqlalchemy.orm import DeclarativeBase
 
 engine = create_engine(
@@ -21,10 +21,11 @@ class Meal_Report(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     bread_unit = Column(Integer, nullable=False)
-    notes = Column(String, nullable=True)
+    short_insulin = Column(Integer, nullable=True)
+    long_insulin = Column(Integer, nullable=True)
     sugar_value_before = Column(REAL, nullable=True)
     sugar_value_after = Column(REAL, nullable=True)
-    time = Column(Time(), nullable=False)
+    notes = Column(String, nullable=True)
 
 
 class Day_Report(Base):

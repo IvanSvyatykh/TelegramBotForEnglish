@@ -11,7 +11,7 @@ from database.database import engine as database
 from database.database import Person
 import keyboard
 import text
-from handlers import help_handler
+from handlers.help_handler import help_handler
 
 router = Router()
 
@@ -31,7 +31,7 @@ async def start_handler(msg: Message, state=FSMContext) -> None:
         await state.set_state(CurrentPerson.diabetes_type)
         await msg.answer(
             text=text.start_registration.format(name=msg.from_user.full_name),
-            reply_markup=keyboard.get_diabet_type_keyboard(),
+            reply_markup=keyboard.get_diabetes_type_keyboard(),
         )
     else:
         await state.clear()
@@ -50,7 +50,7 @@ async def set_diabetes_type_handler(msg: Message, state=FSMContext) -> None:
 async def save_user_to_db(data: Dict[str, Any]):
     with Session(autoflush=False, bind=database.engine) as db:
         repository = TableRepository(db=db, entity=Person)
-        user_to_db = database.Person(id=data["id"], name=data["name"], diabetes_type=data["diabetes_type"])
+        user_to_db = Person(id=data["id"], name=data["name"], diabetes_type=data["diabetes_type"])
         repository.add_user(user_to_db)
 
 
