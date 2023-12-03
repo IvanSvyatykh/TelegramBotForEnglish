@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from datetime import datetime
 
 
 class TableRepository:
@@ -11,6 +12,9 @@ class TableRepository:
 
     def get_by_id(self, id: int):
         return self.db.query(self.entity).filter(self.entity.id == id).first()
+
+    def get_by_date(self, date: datetime):
+        return self.db.query(self.entity).filter(self.entity.date == date).first()
 
     def add_user(self, entity):
         self.db.add(entity)

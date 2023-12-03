@@ -2,12 +2,13 @@ import calendar, locale
 from calendar import Calendar
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 from datetime import datetime
+from datetime import date
 from calendar import monthrange
 
 locale.setlocale(locale.LC_ALL, 'ru_RU')
 
 
-def get_reply_keyboard():
+async def get_reply_keyboard():
     keyboard_builder = ReplyKeyboardBuilder()
     keyboard_builder.button(text="Зарегистрироваться", callback_data="register")
     keyboard_builder.button(text="Войти", callback_data="sign in")
@@ -18,24 +19,25 @@ def get_month_keyboard():
     keyboard_builder = InlineKeyboardBuilder()
     months = calendar.month_name[1:]
 
-    for month in months:
-        keyboard_builder.button(text=f"{month}", callback_data=f"{datetime.strptime(month, '%B')}")
+    for i in range(len(months)):
+        keyboard_builder.button(text=f"{months[i]}", callback_data=f"{i+1}")
 
     return keyboard_builder.adjust(2).as_markup(one_time_keyboard=True, resize_keyboard=True)
 
 
 def get_days_keyboard(month):
     keyboard_builder = InlineKeyboardBuilder()
+    current_year = datetime.now().year
+    num_days = monthrange(current_year, int(month))[1]
+    days = [calendar.day_name[date(current_year, int(month), day).weekday()] for day in range(1, num_days + 1)]
 
-    num_days = calendar.monthrange(23, 11)[1]
-
-    for day in range(1, 30):
-        keyboard_builder.button(text=f"{day}", callback_data=f"{day}")
+    for i in range(len(days)):
+        keyboard_builder.button(text=f"{days[i]}-{i + 1}", callback_data=f"{i + 1}")
 
     return keyboard_builder.adjust(3).as_markup(one_time_keyboard=True, resize_keyboard=True)
 
 
-def get_diabetes_type_keyboard():
+async def get_diabetes_type_keyboard():
     keyboard_builder = ReplyKeyboardBuilder()
     keyboard_builder.button(text="1 тип диабета", callback_data="first type diabetes")
     keyboard_builder.button(text="2 тип диабета", callback_data="second type diabetes")

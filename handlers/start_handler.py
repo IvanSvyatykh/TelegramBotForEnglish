@@ -31,7 +31,7 @@ async def start_handler(msg: Message, state=FSMContext) -> None:
         await state.set_state(CurrentPerson.diabetes_type)
         await msg.answer(
             text=text.start_registration.format(name=msg.from_user.full_name),
-            reply_markup=keyboard.get_diabetes_type_keyboard(),
+            reply_markup=await keyboard.get_diabetes_type_keyboard(),
         )
     else:
         await state.clear()
