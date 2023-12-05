@@ -51,7 +51,7 @@ async def save_user_to_db(data: Dict[str, Any]):
     with Session(autoflush=False, bind=database.engine) as db:
         repository = TableRepository(db=db, entity=Person)
         user_to_db = Person(id=data["id"], name=data["name"], diabetes_type=data["diabetes_type"])
-        repository.add_user(user_to_db)
+        repository.add(user_to_db)
 
 
 async def show_summary(msg: Message, data: Dict[str, Any]):

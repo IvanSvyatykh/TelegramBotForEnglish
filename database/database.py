@@ -20,6 +20,7 @@ class Meal_Report(Base):
     __tablename__ = "meal_report"
 
     id = Column(Integer, primary_key=True, index=True)
+    report_id = Column(Integer , ForeignKey("day_report.id"))
     bread_unit = Column(Integer, nullable=False)
     short_insulin = Column(Integer, nullable=True)
     long_insulin = Column(Integer, nullable=True)
@@ -32,7 +33,7 @@ class Day_Report(Base):
     __tablename__ = "day_report"
 
     id = Column(Integer, primary_key=True, index=True)
-    person_id = Column(Integer, ForeignKey("people.id"))
+    person_id = Column(BigInteger, ForeignKey("people.id"))
     breakfast_id = Column(Integer, ForeignKey("meal_report.id"))
     lunch_id = Column(Integer, ForeignKey("meal_report.id"))
     dinner_id = Column(Integer, ForeignKey("meal_report.id"))

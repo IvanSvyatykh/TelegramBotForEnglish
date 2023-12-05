@@ -15,17 +15,17 @@ async def get_reply_keyboard():
     return keyboard_builder.as_markup(one_time_keyboard=True, resize_keyboard=True)
 
 
-def get_month_keyboard():
+async def get_month_keyboard():
     keyboard_builder = InlineKeyboardBuilder()
     months = calendar.month_name[1:]
 
     for i in range(len(months)):
-        keyboard_builder.button(text=f"{months[i]}", callback_data=f"{i+1}")
+        keyboard_builder.button(text=f"{months[i]}", callback_data=f"{i + 1}")
 
     return keyboard_builder.adjust(2).as_markup(one_time_keyboard=True, resize_keyboard=True)
 
 
-def get_days_keyboard(month):
+async def get_days_keyboard(month):
     keyboard_builder = InlineKeyboardBuilder()
     current_year = datetime.now().year
     num_days = monthrange(current_year, int(month))[1]
@@ -44,3 +44,12 @@ async def get_diabetes_type_keyboard():
     keyboard_builder.button(text="Гестационный диабет", callback_data="Gestational diabetes")
     keyboard_builder.button(text="Специфический диабет", callback_data="Specific diabetes")
     return keyboard_builder.adjust(2).as_markup(one_time_keyboard=True, resize_keyboard=True)
+
+
+async def get_eat_time():
+    keyboard_builder = InlineKeyboardBuilder()
+    keyboard_builder.button(text="Завтрак", callback_data="Завтрак")
+    keyboard_builder.button(text="Обед", callback_data="Обед")
+    keyboard_builder.button(text="Ужин", callback_data="Ужин")
+    keyboard_builder.button(text="Сохранить", callback_data="Сохранить")
+    return keyboard_builder.as_markup(one_time_keyboard=True, resize_keyboard=True)

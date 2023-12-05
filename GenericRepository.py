@@ -13,9 +13,9 @@ class TableRepository:
     def get_by_id(self, id: int):
         return self.db.query(self.entity).filter(self.entity.id == id).first()
 
-    def get_by_date(self, date: datetime):
-        return self.db.query(self.entity).filter(self.entity.date == date).first()
+    def get_by_date_and_id(self, date: datetime, id: int):
+        return self.db.query(self.entity).filter(self.entity.date == date and self.entity.person_id == id).first()
 
-    def add_user(self, entity):
+    def add(self, entity):
         self.db.add(entity)
         self.db.commit()
