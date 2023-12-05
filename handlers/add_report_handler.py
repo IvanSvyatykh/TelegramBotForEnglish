@@ -26,6 +26,7 @@ class PersonReport(StatesGroup):
     month = State()
     day = State()
     meal = State()
+    meal_report_id = State()
     report_id = State()
     breakfast_id = State()
     lunch_id = State()
@@ -63,7 +64,9 @@ async def choose_part_of_day(msg: CallbackQuery, state=FSMContext):
                 cur_date=date(datetime.now().year, int(data["month"]), int(data["day"])).strftime("%d-%m-%Y")),
             reply_markup=await keyboard.get_eat_time())
     else:
-        await msg.message.answer(text="!!!")
+        await set_state(current_report, state)
+        await state.set_state(PersonReport.meal)
+        await msg.message.answer(text=text.already_have_report, reply_markup=await keyboard.get_eat_time())
 
 
 @router.callback_query(PersonReport.meal)
@@ -93,11 +96,21 @@ async def add_report(msg: CallbackQuery, state=FSMContext):
         data = await state.get_data()
         await state.clear()
 
-        report = Day_Report(person_id=msg.from_user.id, breakfast_id=data["breakfast_id"], lunch_id=data["lunch_id"],
-                            dinner_id=data["dinner_id"],
-                            date=date(datetime.now().year, int(data["month"]), int(data["day"])))
-        a = 0
-        await save_report(report, msg.message)
+        if ("meal_report_id" in data):
+            current_report = await get_report_by_date_and_id(
+                date(datetime.now().year, int(data["month"]), int(data["day"])),
+                msg.from_user.id)
+            current_report.breakfast_id = data["breakfast_id"]
+            current_report.lunch_id = data["lunch_id"]
+            current_report.dinner_id = data["dinner_id"]
+            await save_report(current_report, msg.message)
+        else:
+            report = Day_Report(person_id=msg.from_user.id,
+                                breakfast_id=data["breakfast_id"],
+                                lunch_id=data["lunch_id"],
+                                dinner_id=data["dinner_id"],
+                                date=date(datetime.now().year, int(data["month"]), int(data["day"])))
+            await save_report(report, msg.message)
 
 
 async def get_report_by_date_and_id(date: datetime, id: int):
@@ -105,6 +118,17 @@ async def get_report_by_date_and_id(date: datetime, id: int):
         repository = TableRepository(db=db, entity=Day_Report)
         current_report = repository.get_by_date_and_id(date, id)
         return current_report
+
+
+async def set_state(current_report: Day_Report, state=FSMContext):
+    await state.set_state(PersonReport.breakfast_id)
+    await state.update_data(breakfast_id=current_report.breakfast_id)
+    await state.set_state(PersonReport.lunch_id)
+    await state.update_data(lunch_id=current_report.lunch_id)
+    await state.set_state(PersonReport.dinner_id)
+    await state.update_data(dinner_id=current_report.dinner_id)
+    await state.set_state(PersonReport.meal_report_id)
+    await state.update_data(meal_report_id=current_report.id)
 
 
 async def save_report(report: Day_Report, msg: Message):
