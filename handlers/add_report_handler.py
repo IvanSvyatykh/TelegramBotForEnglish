@@ -3,7 +3,7 @@ from datetime import date
 from datetime import datetime
 
 import sqlalchemy.sql
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
@@ -40,6 +40,12 @@ async def choose_report_month(msg: Message, state=FSMContext):
                      reply_markup=await keyboard.get_month_keyboard())
 
 
+@router.message(Command("cancel"))
+async def cancel_month(msg: Message, state=FSMContext):
+    await state.clear()
+    await msg.answer(text="Добавление отчета остановлено")
+
+
 @router.callback_query(PersonReport.month)
 async def choose_report_day(msg: CallbackQuery, state=FSMContext):
     data = msg.data
@@ -48,6 +54,13 @@ async def choose_report_day(msg: CallbackQuery, state=FSMContext):
     await msg.message.answer(
         text=text.choose_day.format(year=datetime.now().year, month=calendar.month_name[int(data)]),
         reply_markup=await keyboard.get_days_keyboard(data))
+
+
+@router.message(Command("back"), PersonReport.day)
+async def back_to_month(msg: Message, state=FSMContext):
+    await state.set_state(PersonReport.month)
+    await msg.answer(text=text.choose_month.format(year=datetime.now().year),
+                     reply_markup=await keyboard.get_month_keyboard())
 
 
 @router.callback_query(PersonReport.day)
@@ -66,7 +79,18 @@ async def choose_part_of_day(msg: CallbackQuery, state=FSMContext):
     else:
         await set_state(current_report, state)
         await state.set_state(PersonReport.meal)
-        await msg.message.answer(text=text.already_have_report, reply_markup=await keyboard.get_eat_time())
+        await msg.message.answer(text=text.already_have_report.format(
+            cur_date=date(datetime.now().year, int(data["month"]), int(data["day"])).strftime("%d-%m-%Y")),
+            reply_markup=await keyboard.get_eat_time())
+
+
+@router.message(Command("back"), PersonReport.meal)
+async def back_to_month(msg: Message, state=FSMContext):
+    await state.set_state(PersonReport.day)
+    data = await state.get_data()
+    await msg.answer(
+        text=text.choose_day.format(year=datetime.now().year, month=calendar.month_name[int(data["month"])]),
+        reply_markup=await keyboard.get_days_keyboard(data["month"]))
 
 
 @router.callback_query(PersonReport.meal)
