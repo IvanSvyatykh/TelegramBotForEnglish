@@ -13,13 +13,11 @@ from GenericRepository import TableRepository
 from database.database import engine as database
 from database.database import Day_Report
 from sqlalchemy.orm import Session
-from sqlalchemy import Date
 
 import keyboard
 import text
 
 router = Router()
-month_nums = map(str, (1, 13))
 
 
 class PersonReport(StatesGroup):
@@ -95,14 +93,7 @@ async def back_to_month(msg: Message, state=FSMContext):
 @router.callback_query(PersonReport.meal)
 async def add_report(msg: CallbackQuery, state=FSMContext):
     await state.update_data(meal=msg.data)
-    res = await state.get_data()
-    if res["meal"] == "Завтрак":
-        await msg.message.answer(text="Завтрак!!!")
-    elif res["meal"] == "Обед":
-        await msg.message.answer(text="Обед!")
-    elif res["meal"] == "Ужин":
-        await msg.message.answer(text="Ужин!")
-    else:
+    if msg.data == "Сохранить":
 
         data = await state.get_data()
         await update_state(data, state)
@@ -120,6 +111,10 @@ async def add_report(msg: CallbackQuery, state=FSMContext):
                                 dinner=data["dinner"],
                                 date=date(datetime.now().year, int(data["month"]), int(data["day"])))
             await save_report(report, msg.message)
+    else:
+        await state.set_state(ReportState.bread_units)
+        await msg.message.answer(
+            text="Введите количество хлебных единиц за прием, если вы не хотите вводить их введите символ - .")
 
 
 async def update_state(data, state):
@@ -164,3 +159,74 @@ async def save_report(report: Day_Report, msg: Message):
         repository = TableRepository(db=db, entity=Day_Report)
         repository.add(report)
     await msg.answer(text="Данные успешно сохранены")
+
+
+class ReportState(StatesGroup):
+    bread_units = State()
+    short_insulin = State()
+    long_insulin = State()
+    sugar_before = State()
+    sugar_after = State()
+    report = State()
+
+
+@router.message(ReportState.bread_units)
+async def ask_short_insulin(msg: Message, state=FSMContext):
+    if msg.text.isdecimal() or msg.text == "-":
+        await state.update_data(bread_units=msg.text)
+        await state.set_state(ReportState.short_insulin)
+        await msg.answer(
+            text="Отлично! Добавьте значение короткого инсулина, если вы не хотите вводить их введите символ - ")
+    else:
+        await msg.answer(text="Введеное значение не может быть числом, введите хлебные еденицы заново")
+
+
+@router.message(ReportState.short_insulin)
+async def ask_long_insulin(msg: Message, state=FSMContext):
+    if msg.text.isdecimal() or msg.text == "-":
+        await state.update_data(short_insulin=msg.text)
+        await state.set_state(ReportState.long_insulin)
+        await msg.answer(
+            text="Отлично! Добавьте значение длинного инсулина  еды, если вы не хотите вводить их введите символ - ")
+    else:
+        await msg.answer(text="Введеное значение не может быть числом, введите короткий инсулин заново")
+
+
+@router.message(ReportState.long_insulin)
+async def ask_sugar_before(msg: Message, state=FSMContext):
+    if msg.text.isdecimal() or msg.text == "-":
+        await state.update_data(long_insulin=msg.text)
+        await state.set_state(ReportState.sugar_before)
+        await msg.answer(
+            text="Отлично! Добавьте значение сахара до еды, если вы не хотите вводить их введите символ - ")
+    else:
+        await msg.answer(text="Введеное значение не может быть числом, введите длинный инсулин  заново")
+
+
+@router.message(ReportState.sugar_before)
+async def ask_sugar_after(msg: Message, state=FSMContext):
+    if msg.text.isdecimal() or msg.text == "-":
+        await state.update_data(sugar_before=msg.text)
+        await state.set_state(ReportState.sugar_after)
+        await msg.answer(
+            text="Отлично! Добавьте значение сахара после еды, если вы не хотите вводить их введите символ - ")
+    else:
+        await msg.answer(text="Введеное значение не может быть числом, введите сахар до еды заново")
+
+
+@router.message(ReportState.sugar_after)
+async def ask_health(msg: Message, state=FSMContext):
+    if msg.text.isdecimal() or msg.text == "-":
+        await state.update_data(sugar_after=msg.text)
+        await state.set_state(ReportState.report)
+        await msg.answer(
+            text="Отлично! Добавьте описание своего самочувствия")
+    else:
+        await msg.answer(text="Введеное значение не может быть числом, введите сахар после еды заново")
+
+
+@router.message(ReportState.report)
+async def final(msg: Message, state=FSMContext):
+    await state.update_data(report=msg.text)
+    await msg.answer(
+        text="Отлично! Все готово")

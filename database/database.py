@@ -19,8 +19,6 @@ class Person(Base):
 class Meal_Report():
     __tablename__ = "meal_report"
 
-    id = Column(Integer, primary_key=True, index=True)
-    report_id = Column(Integer, ForeignKey("day_report.id"))
     bread_unit = Column(Integer, nullable=False)
     short_insulin = Column(Integer, nullable=True)
     long_insulin = Column(Integer, nullable=True)
