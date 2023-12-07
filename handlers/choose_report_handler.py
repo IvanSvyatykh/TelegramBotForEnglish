@@ -1,4 +1,5 @@
 import calendar
+import json
 from datetime import date
 from datetime import datetime
 
@@ -241,21 +242,26 @@ async def final(msg: Message, state=FSMContext):
         return
 
     data = await state.get_data()
-
+    await update_state(data, state)
     res = await form_dic(data)
-
-    if data["meal"] == "Завтрак":
-        data["breakfast"] = res
-    if data["meal"] == "Обед":
-        data["lunch"] = res
-    if data["meal"] == "Ужин":
-        data["dinner"] = res
 
     await state.clear()
 
     current_report = await get_report_by_date_and_id(date(datetime.now().year, int(data["month"]), int(data["day"])),
                                                      msg.from_user.id)
     if current_report is None:
+        if data["meal"] == "Завтрак":
+            data["breakfast"] = json.dumps(res, ensure_ascii=False)
+            data["lunch"] = sqlalchemy.sql.null()
+            data["dinner"] = sqlalchemy.sql.null()
+        if data["meal"] == "Обед":
+            data["lunch"] = json.dumps(res, ensure_ascii=False)
+            data["breakfast"] = sqlalchemy.sql.null()
+            data["dinner"] = sqlalchemy.sql.null()
+        if data["meal"] == "Ужин":
+            data["dinner"] = json.dumps(res, ensure_ascii=False)
+            data["breakfast"] = sqlalchemy.sql.null()
+            data["lunch"] = sqlalchemy.sql.null()
 
         report = Day_Report(person_id=msg.from_user.id,
                             breakfast=data["breakfast"],
@@ -265,16 +271,22 @@ async def final(msg: Message, state=FSMContext):
 
         await save_report(report, msg)
     else:
+        if data["meal"] == "Завтрак":
+            data["breakfast"] = json.dumps(res, ensure_ascii=False)
+        if data["meal"] == "Обед":
+            data["lunch"] = json.dumps(res, ensure_ascii=False)
+        if data["meal"] == "Ужин":
+            data["dinner"] = json.dumps(res, ensure_ascii=False)
         current_report = await update_data(current_report, data)
         await save_report(current_report, msg)
 
 
 async def form_dic(data, state=FSMContext) -> dict:
     report = {}
-    report["Хлебные еденицы"] = data["bread_units"]
-    report["Короткий инсулин"] = data["short_insulin"]
-    report["Длинный инсулин"] = data["long_insulin"]
-    report["Сахар до"] = data["sugar_before"]
-    report["Сахар после"] = data["sugar_after"]
-    report["Самочувствие"] = data["report"]
+    report['Хлебные еденицы'] = data["bread_units"]
+    report['Короткий инсулин'] = data["short_insulin"]
+    report['Длинный инсулин'] = data["long_insulin"]
+    report['Сахар до'] = data["sugar_before"]
+    report['Сахар после'] = data["sugar_after"]
+    report['Самочувствие'] = data["report"]
     return report

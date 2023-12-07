@@ -2,7 +2,7 @@ from sqlalchemy import create_engine, Column, ForeignKey, Integer, REAL, String,
 from sqlalchemy.orm import DeclarativeBase
 
 engine = create_engine(
-    "postgresql+psycopg2://postgres:Metallika2004@localhost:5432/telegramm_bot")
+    "postgresql+psycopg2://postgres:Metallika2004@localhost:5432/telegramm_bot", client_encoding='utf8')
 
 
 class Base(DeclarativeBase): pass
