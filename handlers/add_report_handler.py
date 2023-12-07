@@ -26,11 +26,10 @@ class PersonReport(StatesGroup):
     month = State()
     day = State()
     meal = State()
-    meal_report_id = State()
     report_id = State()
-    breakfast_id = State()
-    lunch_id = State()
-    dinner_id = State()
+    breakfast = State()
+    lunch = State()
+    dinner = State()
 
 
 @router.message(Command("report"))
@@ -110,35 +109,35 @@ async def add_report(msg: CallbackQuery, state=FSMContext):
         data = await state.get_data()
         await state.clear()
 
-        if ("meal_report_id" in data):
+        if ("report_id" in data):
             await save_report(await update_data(await get_report_by_date_and_id(
                 date(datetime.now().year, int(data["month"]), int(data["day"])),
                 msg.from_user.id), data), msg.message)
         else:
             report = Day_Report(person_id=msg.from_user.id,
-                                breakfast_id=data["breakfast_id"],
-                                lunch_id=data["lunch_id"],
-                                dinner_id=data["dinner_id"],
+                                breakfast=data["breakfast"],
+                                lunch=data["lunch"],
+                                dinner=data["dinner"],
                                 date=date(datetime.now().year, int(data["month"]), int(data["day"])))
             await save_report(report, msg.message)
 
 
 async def update_state(data, state):
-    if ("breakfast_id" not in data):
-        await state.set_state(PersonReport.breakfast_id)
-        await state.update_data(breakfast_id=sqlalchemy.sql.null())
-    if ("lunch_id" not in data):
-        await state.set_state(PersonReport.lunch_id)
-        await state.update_data(lunch_id=sqlalchemy.sql.null())
-    if ("dinner_id" not in data):
-        await state.set_state(PersonReport.dinner_id)
-        await state.update_data(dinner_id=sqlalchemy.sql.null())
+    if ("breakfast" not in data):
+        await state.set_state(PersonReport.breakfast)
+        await state.update_data(breakfast=sqlalchemy.sql.null())
+    if ("lunch" not in data):
+        await state.set_state(PersonReport.lunch)
+        await state.update_data(lunch=sqlalchemy.sql.null())
+    if ("dinner" not in data):
+        await state.set_state(PersonReport.dinner)
+        await state.update_data(dinner=sqlalchemy.sql.null())
 
 
 async def update_data(current_report, data):
-    current_report.breakfast_id = data["breakfast_id"]
-    current_report.lunch_id = data["lunch_id"]
-    current_report.dinner_id = data["dinner_id"]
+    current_report.breakfast = data["breakfast"]
+    current_report.lunch = data["lunch"]
+    current_report.dinner = data["dinner"]
     return current_report
 
 
@@ -150,14 +149,14 @@ async def get_report_by_date_and_id(date: datetime, id: int):
 
 
 async def set_state(current_report: Day_Report, state=FSMContext):
-    await state.set_state(PersonReport.breakfast_id)
-    await state.update_data(breakfast_id=current_report.breakfast_id)
-    await state.set_state(PersonReport.lunch_id)
-    await state.update_data(lunch_id=current_report.lunch_id)
-    await state.set_state(PersonReport.dinner_id)
-    await state.update_data(dinner_id=current_report.dinner_id)
-    await state.set_state(PersonReport.meal_report_id)
-    await state.update_data(meal_report_id=current_report.id)
+    await state.set_state(PersonReport.breakfast)
+    await state.update_data(breakfast=current_report.breakfast)
+    await state.set_state(PersonReport.lunch)
+    await state.update_data(lunch=current_report.lunch)
+    await state.set_state(PersonReport.dinner)
+    await state.update_data(dinner=current_report.dinner)
+    await state.set_state(PersonReport.report_id)
+    await state.update_data(report_id=current_report.id)
 
 
 async def save_report(report: Day_Report, msg: Message):

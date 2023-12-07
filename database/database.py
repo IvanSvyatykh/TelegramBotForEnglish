@@ -1,8 +1,8 @@
-from sqlalchemy import create_engine, Column, ForeignKey, Integer, REAL, String, Date, BigInteger
+from sqlalchemy import create_engine, Column, ForeignKey, Integer, REAL, String, Date, BigInteger, JSON
 from sqlalchemy.orm import DeclarativeBase
 
 engine = create_engine(
-    "postgresql+psycopg2://okyupals:aH7AaQbo9ywKjB0h_sT2hrPttbmRftjT@raja.db.elephantsql.com/okyupals")
+    "postgresql+psycopg2://postgres:Metallika2004@localhost:5432/telegramm_bot")
 
 
 class Base(DeclarativeBase): pass
@@ -16,11 +16,11 @@ class Person(Base):
     diabetes_type = Column(String)
 
 
-class Meal_Report(Base):
+class Meal_Report():
     __tablename__ = "meal_report"
 
     id = Column(Integer, primary_key=True, index=True)
-    report_id = Column(Integer , ForeignKey("day_report.id"))
+    report_id = Column(Integer, ForeignKey("day_report.id"))
     bread_unit = Column(Integer, nullable=False)
     short_insulin = Column(Integer, nullable=True)
     long_insulin = Column(Integer, nullable=True)
@@ -34,9 +34,9 @@ class Day_Report(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     person_id = Column(BigInteger, ForeignKey("people.id"))
-    breakfast_id = Column(Integer, ForeignKey("meal_report.id"))
-    lunch_id = Column(Integer, ForeignKey("meal_report.id"))
-    dinner_id = Column(Integer, ForeignKey("meal_report.id"))
+    breakfast = Column(JSON)
+    lunch = Column(JSON)
+    dinner = Column(JSON)
     date = Column(Date, nullable=False)
 
 
