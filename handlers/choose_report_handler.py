@@ -168,6 +168,7 @@ class ReportState(StatesGroup):
     sugar_before = State()
     sugar_after = State()
     report = State()
+    finish = State()
 
 
 @router.message(ReportState.bread_units)
@@ -228,5 +229,52 @@ async def ask_health(msg: Message, state=FSMContext):
 @router.message(ReportState.report)
 async def final(msg: Message, state=FSMContext):
     await state.update_data(report=msg.text)
+    await state.set_state(ReportState.finish)
     await msg.answer(
-        text="Отлично! Все готово")
+        text="Отлично! Все готово.", reply_markup=await keyboard.get_confirmation())
+
+
+@router.message(ReportState.finish)
+async def final(msg: Message, state=FSMContext):
+    if msg.text == "Отмена":
+        await state.clear()
+        return
+
+    data = await state.get_data()
+
+    res = await form_dic(data)
+
+    if data["meal"] == "Завтрак":
+        data["breakfast"] = res
+    if data["meal"] == "Обед":
+        data["lunch"] = res
+    if data["meal"] == "Ужин":
+        data["dinner"] = res
+
+    await state.clear()
+
+    current_report = await get_report_by_date_and_id(date(datetime.now().year, int(data["month"]), int(data["day"])),
+                                                     msg.from_user.id)
+    if current_report is None:
+
+        report = Day_Report(person_id=msg.from_user.id,
+                            breakfast=data["breakfast"],
+                            lunch=data["lunch"],
+                            dinner=data["dinner"],
+                            date=date(datetime.now().year, int(data["month"]), int(data["day"])))
+
+        await save_report(report, msg)
+    else:
+        current_report = await update_data(current_report, data)
+        await save_report(current_report, msg)
+
+
+async def form_dic(data, state=FSMContext) -> dict:
+    report = {}
+    report["Хлебные еденицы"] = data["bread_units"]
+    report["Короткий инсулин"] = data["short_insulin"]
+    report["Длинный инсулин"] = data["long_insulin"]
+    report["Сахар до"] = data["sugar_before"]
+    report["Сахар после"] = data["sugar_after"]
+    report["Самочувствие"] = data["report"]
+    return report

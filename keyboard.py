@@ -53,3 +53,10 @@ async def get_eat_time():
     keyboard_builder.button(text="Ужин", callback_data="Ужин")
     keyboard_builder.button(text="Сохранить", callback_data="Сохранить")
     return keyboard_builder.as_markup(one_time_keyboard=True, resize_keyboard=True)
+
+
+async def get_confirmation():
+    keyboard_builder = ReplyKeyboardBuilder()
+    keyboard_builder.button(text="Сохранить", callback_data="Сохранить")
+    keyboard_builder.button(text="Отмена", callback_data="Отмена")
+    return keyboard_builder.adjust(2).as_markup(one_time_keyboard=True, resize_keyboard=True)
