@@ -29,6 +29,7 @@ class PersonReport(StatesGroup):
     breakfast = State()
     lunch = State()
     dinner = State()
+    see_report = State()
 
 
 @router.message(Command("report"))
@@ -113,9 +114,48 @@ async def add_report(msg: CallbackQuery, state=FSMContext):
                                 date=date(datetime.now().year, int(data["month"]), int(data["day"])))
             await save_report(report, msg.message)
     else:
-        await state.set_state(ReportState.bread_units)
+        await state.set_state(PersonReport.see_report)
         await msg.message.answer(
+            text="Выберите вариант работы с отчетом.Внимание, если вы выберите существующий прием пищи в режиме редактирования, данные перезапишутся",
+            reply_markup=await keyboard.get_variants())
+
+
+@router.message(PersonReport.see_report)
+async def see_or_add(msg: Message, state=FSMContext):
+    if msg.text == "Добавить":
+        await state.set_state(ReportState.bread_units)
+        await msg.answer(
             text="Введите количество хлебных единиц за прием, если вы не хотите вводить их введите символ - .")
+
+    if ((msg.text == "Просмотреть") and (await get_current_meal(await state.get_data()) is None)):
+        await state.set_state(ReportState.bread_units)
+        await msg.answer(
+            text="Выбранный прием пищи не заполнен,сначал заполните его.Введите количество хлебных единиц за прием, если вы не хотите вводить их введите символ - .")
+    elif msg.text == "Просмотреть":
+        data = await state.get_data()
+        meal = await get_current_meal(data)
+        meal = meal.replace("\"", "")
+        meal = meal.replace("{", "")
+        meal = meal.replace("}", "")
+        meal = meal.split(",")
+        await state.clear()
+        await msg.answer(text=text.report.format(meal=data["meal"], date=date(datetime.now().year, int(data["month"]),
+                                                                              int(data["day"])).strftime("%d-%m-%Y"),
+                                                 bread_units=meal[0],
+                                                 short_insulin=meal[1].replace(" ", "", 1),
+                                                 long_insulin=meal[2].replace(" ", "", 1),
+                                                 sugar_before=meal[3].replace(" ", "", 1),
+                                                 sugar_after=meal[4].replace(" ", "", 1),
+                                                 report=meal[5].replace(" ", "", 1)))
+
+
+async def get_current_meal(data):
+    if (data["meal"] == "Завтрак"):
+        return data["breakfast"]
+    elif (data["meal"] == "Обед"):
+        return data["lunch"]
+    elif (data["meal"] == "Ужин"):
+        return data["dinner"]
 
 
 async def update_state(data, state):
@@ -238,6 +278,7 @@ async def final(msg: Message, state=FSMContext):
 @router.message(ReportState.finish)
 async def final(msg: Message, state=FSMContext):
     if msg.text == "Отмена":
+        await msg.answer(text="Оформление остановлено!")
         await state.clear()
         return
 

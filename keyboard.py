@@ -60,3 +60,10 @@ async def get_confirmation():
     keyboard_builder.button(text="Сохранить", callback_data="Сохранить")
     keyboard_builder.button(text="Отмена", callback_data="Отмена")
     return keyboard_builder.adjust(2).as_markup(one_time_keyboard=True, resize_keyboard=True)
+
+
+async def get_variants():
+    keyboard_builder = ReplyKeyboardBuilder()
+    keyboard_builder.button(text="Просмотреть", callback_data="Просмотреть")
+    keyboard_builder.button(text="Добавить", callback_data="Добавить")
+    return keyboard_builder.adjust(2).as_markup(one_time_keyboard=True, resize_keyboard=True)

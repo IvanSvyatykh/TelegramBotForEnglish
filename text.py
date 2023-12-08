@@ -46,3 +46,11 @@ no_report_variant = ("У вас еще нет отчетов за выбранн
 already_have_report = (
     "В эту дату({cur_date}) уже есть отчет,выберите прием пищи который вы хотите добавить или редактировать"
     "Для возврашения к выбору дня введите /back")
+
+report = ("{meal}, за {date}, были следующие показатели\n"
+          "{bread_units}\n"
+          "{short_insulin}\n"
+          "{long_insulin}\n"
+          "{sugar_before}\n"
+          "{sugar_after}\n"
+          "{report}")
