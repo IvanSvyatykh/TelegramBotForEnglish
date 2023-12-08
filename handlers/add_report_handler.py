@@ -42,7 +42,7 @@ async def choose_report_month(msg: Message, state=FSMContext):
 @router.message(Command("cancel"))
 async def cancel_month(msg: Message, state=FSMContext):
     await state.clear()
-    await msg.answer(text="Добавление отчета остановлено")
+    await msg.answer(text="Операция остановлена")
 
 
 @router.callback_query(PersonReport.month)
