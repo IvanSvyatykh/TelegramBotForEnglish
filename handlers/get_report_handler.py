@@ -71,7 +71,7 @@ async def choose_part_of_day(msg: CallbackQuery, state=FSMContext):
                                                 sugar_after=breakfast[4].replace(" ", "", 1),
                                                 report=breakfast[5].replace(" ", "", 1))
         else:
-            breakfast = text.show_report(meal="Завтрак", report="Этот прием пищи пуст.")
+            breakfast = text.show_empty_report.format(meal="Завтрак", report="Этот прием пищи пуст.")
 
         if data["lunch"] is not None:
             lunch = await get_report_arr("Обед", data)
@@ -82,7 +82,7 @@ async def choose_part_of_day(msg: CallbackQuery, state=FSMContext):
                                             sugar_after=lunch[4].replace(" ", "", 1),
                                             report=lunch[5].replace(" ", "", 1))
         else:
-            lunch = text.show_report(meal="Обед", report="Этот прием пищи пуст.")
+            lunch = text.show_empty_report.format(meal="Обед", report="Этот прием пищи пуст.")
 
         if data["dinner"] is not None:
             dinner = await get_report_arr("Ужин", data)
@@ -93,7 +93,7 @@ async def choose_part_of_day(msg: CallbackQuery, state=FSMContext):
                                              sugar_after=dinner[4].replace(" ", "", 1),
                                              report=dinner[5].replace(" ", "", 1))
         else:
-            dinner = text.show_report(meal="Ужин", report="Этот прием пищи пуст.")
+            dinner = text.show_empty_report.format(meal="Ужин", report="Этот прием пищи пуст.")
 
         await msg.message.answer(
             text="Дата: " + date(datetime.now().year, int(data["month"]), int(data["day"])).strftime(

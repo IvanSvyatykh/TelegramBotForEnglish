@@ -66,3 +66,8 @@ show_report = (
     "{sugar_after}\n"
     "{report}\n"
 )
+
+show_empty_report = (
+    "{meal}:\n"
+    "{report}\n"
+)
