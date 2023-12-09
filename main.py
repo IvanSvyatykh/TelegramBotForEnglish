@@ -5,7 +5,7 @@ import config
 from aiogram import Bot, Dispatcher
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
-from handlers import start_handler, help_handler, add_report_handler, get_report_handler
+from handlers import start_handler, help_handler, add_report_handler, get_report_handler, form_pdf_report
 
 
 async def main():
@@ -15,6 +15,7 @@ async def main():
     dp.include_router(help_handler.router)
     dp.include_router(add_report_handler.router)
     dp.include_router(get_report_handler.router)
+    dp.include_router(form_pdf_report.router)
 
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())

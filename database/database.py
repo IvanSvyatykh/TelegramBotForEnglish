@@ -16,17 +16,6 @@ class Person(Base):
     diabetes_type = Column(String)
 
 
-class Meal_Report():
-    __tablename__ = "meal_report"
-
-    bread_unit = Column(Integer, nullable=False)
-    short_insulin = Column(Integer, nullable=True)
-    long_insulin = Column(Integer, nullable=True)
-    sugar_value_before = Column(REAL, nullable=True)
-    sugar_value_after = Column(REAL, nullable=True)
-    notes = Column(String, nullable=True)
-
-
 class Day_Report(Base):
     __tablename__ = "day_report"
 
