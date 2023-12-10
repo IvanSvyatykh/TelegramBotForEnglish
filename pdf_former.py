@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import itertools
+import datetime
 from random import randint
 from statistics import mean
 
@@ -10,6 +11,10 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib import colors
+from reportlab.pdfgen.canvas import Canvas
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+from reportlab.lib.styles import getSampleStyleSheet
 
 
 async def grouper(iterable, n):
@@ -18,39 +23,38 @@ async def grouper(iterable, n):
 
 
 async def export_to_pdf(data, name: str):
-    c = canvas.Canvas(f"{name}.pdf", pagesize=A4)
-    w, h = A4
-    max_rows_per_page = 45
-    # Margin.
-    x_offset = 50
-    y_offset = 50
-    # Space between rows.
-    padding = 15
+    canvas = Canvas("canvas.pdf", pagesize=A4)
+    pdfmetrics.registerFont(TTFont('timesnrcyrmt', 'timesnrcyrmt.ttf'))
+    doc = SimpleDocTemplate(f"{name}.pdf", pagesize=A4)
 
-    xlist = [x + x_offset for x in [0, 200, 250, 300, 350, 400, 480]]
-    ylist = [h - y_offset - i * padding for i in range(max_rows_per_page + 1)]
+    elements = []
+    style = TableStyle(
+        [('LINEABOVE', (0, 0), (-1, 0), 1, colors.black),
+         ('LINEABOVE', (0, 1), (-1, -1), 1, colors.black),
+         ('LINEBELOW', (0, -1), (-1, -1), 1, colors.black),
+         ('FONT', (0, 0), (-1, 1), 'timesnrcyrmt', 12),
+         ('FONTNAME', (0, 0), (-1, -1), 'timesnrcyrmt',12),
+         ('BOX', (0, 0), (-1, -1), 1, colors.black),
+         ('BOX', (0, 0), (0, -1), 1, colors.black),
+         ('INNERGRID', (0, 0), (-1, -1), 1, colors.black),
+         ],
+    )
 
-    for rows in await grouper(data, max_rows_per_page):
-        rows = tuple(filter(bool, rows))
-        c.grid(xlist, ylist[:len(rows) + 1])
-        for y, row in zip(ylist[:-1], rows):
-            for x, cell in zip(xlist, row):
-                c.drawString(x + 2, y - padding + 3, str(cell))
-        c.showPage()
-
-    c.save()
+    t = Table(data)
+    t.setStyle(style)
+    elements.append(t)
+    doc.build(elements)
 
 
 async def start(lines: list, name: str):
-    data = [("Хлебные еденицы", "Короткий инсулин", "Длинный инсулин", "Сахар до", "Сахар после", "Самочувствие",
-             "Прием пищи", "Дата")]
-
+    data = [("Х.E.", "К.И", "Д.И.", "Сахар до", "Сахар после", "Самочувствие",
+             "П.П.", "Дата")]
 
     for i in range(len(lines)):
         count = 0
         for string in lines[i]:
             count += 1
-            if string is not None and count < 3:
+            if string is not None and count <= 3:
                 data_arr = string.replace("\"", "").replace("{", "").replace("}", "").split(",")
                 data.append((data_arr[0].replace("Хлебные еденицы:", "").replace(" ", "", 1),
                              data_arr[1].replace("Короткий инсулин:", "").replace(" ", "", 1),
@@ -59,16 +63,17 @@ async def start(lines: list, name: str):
                              data_arr[4].replace("Сахар после:", "").replace(" ", "", 1),
                              data_arr[5].replace("Самочувствие:", "").replace(" ", "", 1),
                              await get_meal_name(count),
-                             lines[i][len(lines[i]) - 1]))
+                             (lines[i][len(lines[i]) - 1]).strftime("%d-%m-%Y")))
+        count = 0
 
     a = 0
     await export_to_pdf(data, name)
 
 
 async def get_meal_name(count: int):
-    if count == 0:
-        return "Завтрак"
     if count == 1:
-        return "Обед"
+        return "Завтрак"
     if count == 2:
+        return "Обед"
+    if count == 3:
         return "Ужин"
